@@ -1,1 +1,11 @@
-
+{
+  "title": "Jeu d'Anagramme",
+  "start": "Commencer",
+  "verify": "Vérifier",
+  "restart": "Recommencer",
+  "score": "Score",
+  "level": "Niveau",
+  "time": "Temps",
+  "correct": "Bonne réponse !",
+  "wrong": "Mauvaise réponse !"
+}
