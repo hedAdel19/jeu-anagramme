@@ -1,1 +1,385 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Jeu d'Anagramme</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #ece9e6, #ffffff);
+      text-align: center;
+      padding: 40px;
+    }
+    #container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: auto;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 10px;
+      width: 80%;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #resultat, #niveau, #temps, #score {
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    #definition {
+      margin-top: 10px;
+      font-style: italic;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>🔤 Jeu d'Anagramme</h1>
+    <p id="niveau">Niveau : FACILE</p>
+    <p id="score">Score : 0</p>
+    <p id="temps">Temps restant : 30s</p>
+    <p id="anagramme"></p>
+    <input type="text" id="reponse" placeholder="Tape ta réponse ici">
+    <br>
+    <button onclick="verifier()">Vérifier</button>
+    <button onclick="rechargerMots()">🔄 Recommencer</button>
+    <p id="resultat"></p>
+    <p id="definition"></p>
+  </div>
+  <script>
+  const tousLesMots = [
+    // Facile (70 mots)
+    "chat", "livre", "soleil", "pomme", "maison", "table", "porte", "arbre", "fleur", "eau",
+    "lune", "clé", "mur", "fenêtre", "chaise", "lampe", "stylo", "papier", "verre", "tasse",
+    "route", "voiture", "bus", "train", "moto", "vélo", "chien", "oiseau", "poisson", "fruit",
+    "banane", "orange", "raisin", "fraise", "cerise", "tomate", "salade", "pain", "fromage", "feu",
+    "air", "terre", "neige", "pluie", "vent", "nuage", "ciel", "herbe", "main", "pied",
+    "tête", "nez", "yeux", "bouche", "oreille", "bras", "jambe", "dos", "ami", "famille",
+    "école", "classe", "bureau", "sac", "chaussure", "stylo", "lampe", "ordinateur", "fenêtre", "chaise",
 
+    // Moyen (70 mots)
+    "navigateurs", "algorithme", "fonction", "variable", "boucle", "condition", "interface", "réseau", "serveur", "client",
+    "tableau", "objet", "classe", "héritage", "encapsulation", "framework", "bibliothèque", "asynchrone", "promesse", "requête",
+    "json", "xml", "html", "css", "react", "vue", "angular", "node", "express", "mongo",
+    "sql", "python", "java", "csharp", "ruby", "swift", "kotlin", "flutter", "dart", "android",
+    "ios", "linux", "windows", "macos", "terminal", "commande", "script", "debug", "compile", "erreur",
+    "exception", "test", "unité", "intégration", "déploiement", "version", "git", "github", "commit", "branche",
+    "merge", "pull", "push", "clone", "fork", "issue", "ticket", "agile", "scrum", "kanban",
+
+    // Difficile (60 mots)
+    "synchronisation", "authentification", "programmation", "cryptographie", "architecture", "intelligence", "accessibilité", "kubernetes", "serveurless", "conteneur",
+    "virtualisation", "machine", "apprentissage", "modélisation", "optimisation", "sécurité", "autorisation", "token", "session", "cookie",
+    "cache", "cdn", "cloud", "docker", "scalabilité", "latence", "débogage", "refactorisation", "modularité", "observabilité",
+    "monitoring", "pipeline", "détection", "analyse", "performance", "résilience", "automatisation", "orchestration", "infra", "backend",
+    "frontend", "fullstack", "responsive", "multithreading", "concurrence", "parallélisme", "sandbox", "firewall", "proxy", "endpoint",
+    "websocket", "API", "REST", "GraphQL", "conteneurisation", "microservices"
+  ];
+
+  const niveaux = {
+    facile: tousLesMots.slice(0, 70),
+    moyen: tousLesMots.slice(70, 140),
+    difficile: tousLesMots.slice(140, 200)
+  };
+  const definitions = {
+  // 🌱 Niveau Facile (70 mots)
+  "chat": "Animal domestique souvent indépendant et joueur.",
+  "livre": "Objet contenant des pages imprimées ou numériques.",
+  "soleil": "Étoile au centre de notre système solaire.",
+  "pomme": "Fruit rond souvent rouge ou vert.",
+  "maison": "Lieu de vie pour une ou plusieurs personnes.",
+  "table": "Meuble plat utilisé pour manger ou travailler.",
+  "porte": "Ouverture permettant d’entrer ou sortir d’un lieu.",
+  "arbre": "Plante ligneuse avec un tronc et des branches.",
+  "fleur": "Partie colorée d’une plante, souvent parfumée.",
+  "eau": "Liquide essentiel à la vie.",
+  "lune": "Satellite naturel de la Terre.",
+  "clé": "Objet permettant d’ouvrir ou fermer une serrure.",
+  "mur": "Surface verticale qui délimite un espace.",
+  "fenêtre": "Ouverture vitrée dans un mur.",
+  "chaise": "Meuble pour s’asseoir.",
+  "lampe": "Objet produisant de la lumière.",
+  "stylo": "Instrument pour écrire.",
+  "papier": "Feuille utilisée pour écrire ou imprimer.",
+  "verre": "Récipient pour boire ou matériau transparent.",
+  "tasse": "Petit récipient pour les boissons chaudes.",
+  "route": "Voie de circulation pour les véhicules.",
+  "voiture": "Véhicule à moteur pour se déplacer.",
+  "bus": "Transport collectif routier.",
+  "train": "Transport ferroviaire rapide.",
+  "moto": "Véhicule à deux roues motorisé.",
+  "vélo": "Véhicule à deux roues sans moteur.",
+  "chien": "Animal domestique fidèle et affectueux.",
+  "oiseau": "Animal à plumes capable de voler.",
+  "poisson": "Animal aquatique à branchies.",
+  "fruit": "Produit comestible issu d’une plante.",
+  "banane": "Fruit jaune allongé.",
+  "orange": "Fruit rond et juteux, riche en vitamine C.",
+  "raisin": "Petit fruit en grappes.",
+  "fraise": "Fruit rouge sucré à graines apparentes.",
+  "cerise": "Petit fruit rouge à noyau.",
+  "tomate": "Fruit rouge souvent utilisé comme légume.",
+  "salade": "Plante verte consommée crue.",
+  "pain": "Aliment de base à base de farine.",
+  "fromage": "Produit laitier fermenté.",
+  "feu": "Combustion produisant chaleur et lumière.",
+  "air": "Mélange gazeux que nous respirons.",
+  "terre": "Sol sur lequel nous marchons.",
+  "neige": "Précipitation solide en flocons blancs.",
+  "pluie": "Précipitation liquide tombant du ciel.",
+  "vent": "Mouvement de l’air.",
+  "nuage": "Masse visible de vapeur d’eau dans le ciel.",
+  "ciel": "Espace visible au-dessus de la Terre.",
+  "herbe": "Plante verte couvrant le sol.",
+  "main": "Partie du corps utilisée pour saisir.",
+  "pied": "Extrémité inférieure de la jambe.",
+  "tête": "Partie supérieure du corps contenant le cerveau.",
+  "nez": "Organe de l’odorat.",
+  "yeux": "Organes de la vision.",
+  "bouche": "Ouverture pour manger et parler.",
+  "oreille": "Organe de l’audition.",
+  "bras": "Membre supérieur du corps.",
+  "jambe": "Membre inférieur du corps.",
+  "dos": "Partie arrière du corps.",
+  "ami": "Personne proche et appréciée.",
+  "famille": "Ensemble de personnes liées par le sang.",
+  "école": "Lieu d’apprentissage.",
+  "classe": "Groupe d’élèves ou salle d’enseignement.",
+  "bureau": "Meuble ou lieu de travail.",
+  "sac": "Objet pour transporter des affaires.",
+  "chaussure": "Objet porté aux pieds pour marcher.",
+  "ordinateur": "Machine électronique qui exécute des programmes.",
+
+  // ⚙️ Niveau Moyen (70 mots)
+  "navigateurs": "Logiciels pour explorer le web.",
+  "algorithme": "Suite d'instructions pour résoudre un problème.",
+  "fonction": "Bloc de code réutilisable dans un programme.",
+  "variable": "Conteneur pour stocker une valeur.",
+  "boucle": "Structure qui répète une action plusieurs fois.",
+  "condition": "Instruction qui exécute du code selon un test.",
+  "interface": "Zone d’interaction entre l’utilisateur et le système.",
+  "réseau": "Ensemble d’ordinateurs connectés entre eux.",
+  "serveur": "Ordinateur qui fournit des services à d'autres.",
+  "client": "Ordinateur ou logiciel qui demande un service.",
+  "tableau": "Structure de données contenant une liste.",
+  "objet": "Structure regroupant des propriétés et méthodes.",
+  "classe": "Modèle pour créer des objets.",
+  "héritage": "Transmission des propriétés d’une classe à une autre.",
+  "encapsulation": "Masquage des détails internes d’un objet.",
+  "framework": "Ensemble d’outils facilitant le développement.",
+  "bibliothèque": "Collection de fonctions réutilisables.",
+  "asynchrone": "Exécution non bloquante d’opérations.",
+  "promesse": "Objet représentant une opération future.",
+  "requête": "Demande envoyée à un serveur.",
+  "json": "Format léger pour échanger des données.",
+  "xml": "Langage de balisage extensible.",
+  "html": "Langage de structure des pages web.",
+  "css": "Langage de style pour les pages web.",
+  "react": "Bibliothèque JavaScript pour créer des interfaces.",
+  "vue": "Framework JavaScript progressif.",
+  "angular": "Framework JavaScript complet.",
+  "node": "Environnement d’exécution JavaScript côté serveur.",
+  "express": "Framework web pour Node.js.",
+  "mongo": "Base de données NoSQL orientée documents.",
+  "sql": "Langage pour interroger des bases de données.",
+  "python": "Langage de programmation polyvalent.",
+  "java": "Langage orienté objet utilisé partout.",
+  "csharp": "Langage de Microsoft pour le développement .NET.",
+  "ruby": "Langage simple et élégant.",
+  "swift": "Langage pour développer sur iOS.",
+  "kotlin": "Langage moderne pour Android.",
+  "flutter": "Framework UI pour créer des apps mobiles.",
+  "dart": "Langage utilisé avec Flutter.",
+  "android": "Système d’exploitation mobile de Google.",
+  "ios": "Système d’exploitation mobile d’Apple.",
+  "linux": "Système d’exploitation libre et puissant.",
+  "windows": "Système d’exploitation de Microsoft.",
+  "macos": "Système d’exploitation d’Apple pour ordinateurs.",
+  "terminal": "Interface en ligne de commande.",
+  "commande": "Instruction saisie dans le terminal.",
+  "script": "Fichier contenant du code exécutable.",
+  "debug": "Processus de recherche d’erreurs.",
+  "compile": "Transformation du code en programme exécutable.",
+  "erreur": "Problème empêchant le bon fonctionnement du code.",
+  "exception": "Erreur gérée par le programme.",
+  "test": "Vérification du bon fonctionnement du code.",
+  "unité": "Test d’une petite portion de code.",
+  "intégration": "Test de plusieurs composants ensemble.",
+  "déploiement": "Mise en ligne d’une application.",
+  "version": "État d’un logiciel à un moment donné.",
+  "git": "Outil de gestion de versions.",
+  "github": "Plateforme de collaboration autour du code.",
+  "commit": "Enregistrement d’un changement dans Git.",
+  "branche": "Version parallèle du code.",
+  "merge": "Fusion de deux branches.",
+  "pull": "Récupération de code depuis un dépôt.",
+  "push": "Envoi de code vers un dépôt.",
+  "clone": "Copie d’un dépôt Git.",
+  "fork": "Duplication d’un projet pour le modifier.",
+  "issue": "Ticket signalant un problème ou une tâche.",
+  "ticket": "Demande ou signalement dans un projet.",
+  "agile": "Méthode de gestion de projet flexible.",
+  "scrum": "Cadre agile basé sur des sprints.",
+  "kanban": "Méthode visuelle de gestion des tâches.",
+
+  // 🔬 Niveau Difficile (60 mots)
+  "synchronisation": "Alignement temporel de processus ou données.",
+  "authentification": "Vérification de l'identité d’un utilisateur.",
+  "programmation": "Art de créer des instructions pour un ordinateur.",
+  "cryptographie": "Science du chiffrement des informations.",
+  "architecture": "Structure globale d’un système informatique.",
+  "intelligence": "Capacité à apprendre, comprendre et s’adapter.",
+  "accessibilité": "Facilité d’accès pour tous, y compris les personnes handicapées.",
+  "serveurless": "Modèle où le serveur est géré automatiquement.",
+  "conteneur": "Unité logicielle regroupant code et dépendances.",
+  "virtualisation": "Technique pour exécuter plusieurs systèmes sur une même machine.",
+  "machine": "Dispositif mécanique ou électronique effectuant des tâches.",
+  "apprentissage": "Processus d’acquisition de connaissances.",
+  "modélisation": "Représentation abstraite d’un système ou concept.",
+  "optimisation": "Amélioration des performances ou de l’efficacité.",
+  "sécurité": "Protection contre les menaces et les accès non autorisés.",
+  "autorisation": "Permission accordée à un utilisateur ou système.",
+  "token": "Jeton d’accès utilisé pour l’authentification.",
+  "session": "Période d’interaction entre un utilisateur et un système.",
+  "cookie": "Fichier stocké par un site web sur l’ordinateur de l’utilisateur.",
+  "cache": "Mémoire temporaire pour accélérer l’accès aux données.",
+  "cdn": "Réseau de serveurs pour distribuer du contenu rapidement.",
+  "cloud": "Stockage et services accessibles via internet.",
+  "docker": "Plateforme pour exécuter des applications en conteneurs.",
+  "scalabilité": "Capacité d’un système à gérer une montée en charge.",
+  "latence": "Délai entre une action et sa réponse.",
+  "débogage": "Processus de correction des erreurs dans le code.",
+  "refactorisation": "Réorganisation du code sans changer son comportement.",
+  "modularité": "Organisation du code en modules indépendants.",
+  "observabilité": "Capacité à comprendre l’état interne d’un système.",
+  "monitoring": "Surveillance des performances et de la santé d’un système.",
+  "pipeline": "Chaîne d’étapes pour traiter des données ou du code.",
+  "détection": "Identification d’un événement ou d’un problème.",
+  "analyse": "Étude détaillée d’un système ou d’un comportement.",
+  "performance": "Vitesse et efficacité d’un système.",
+  "résilience": "Capacité à résister aux pannes ou erreurs.",
+  "automatisation": "Exécution automatique de tâches répétitives.",
+  "orchestration": "Coordination de plusieurs services ou processus.",
+  "infra": "Infrastructure technique d’un système informatique.",
+  "backend": "Partie serveur d’une application.",
+  "frontend": "Partie visible et interactive d’une application.",
+  "fullstack": "Développeur maîtrisant le frontend et le backend.",
+  "responsive": "Interface qui s’adapte à tous les écrans.",
+  "multithreading": "Exécution simultanée de plusieurs tâches.",
+  "concurrence": "Gestion de plusieurs processus en parallèle.",
+  "parallélisme": "Exécution simultanée de tâches pour accélérer le traitement.",
+  "sandbox": "Environnement isolé pour tester du code.",
+  "firewall": "Système de sécurité filtrant les connexions réseau.",
+  "proxy": "Serveur intermédiaire entre client et serveur.",
+  "endpoint": "Point d’accès à une API ou service.",
+  "websocket": "Protocole de communication bidirectionnelle en temps réel.",
+  "API": "Interface permettant à deux systèmes de communiquer.",
+  "REST": "Style d’architecture pour les API web.",
+  "GraphQL": "Langage de requête pour les API.",
+  "conteneurisation": "Technique pour emballer une application dans un conteneur.",
+  "microservices": "Architecture composée de petits services indépendants."
+};
+  let niveauActuel = "facile";
+  let mots = [...niveaux[niveauActuel]];
+  let indexMot = 0;
+  let score = 0;
+  let tempsRestant = 30;
+  let timer;
+
+  function melanger(mot) {
+    return mot.split('').sort(() => Math.random() - 0.5).join('');
+  }
+
+  function messageScore(score) {
+    if (score === 0) return "Courage, le début est toujours difficile 💪";
+    if (score < 100) return "Pas mal ! Tu prends le rythme 🕺";
+    if (score < 200) return "Super ! Tu maîtrises les anagrammes 🔥";
+    if (score < 300) return "Excellent ! Tu es un vrai décodeur 🧠";
+    return "Légendaire ! Tu as dompté tous les mots 💎";
+  }
+
+  function changerNiveau() {
+    if (niveauActuel === "facile" && indexMot >= niveaux["facile"].length) {
+      niveauActuel = "moyen";
+      mots = [...niveaux[niveauActuel]];
+      indexMot = 0;
+    } else if (niveauActuel === "moyen" && indexMot >= niveaux["moyen"].length) {
+      niveauActuel = "difficile";
+      mots = [...niveaux[niveauActuel]];
+      indexMot = 0;
+    } else if (niveauActuel === "difficile" && indexMot >= niveaux["difficile"].length) {
+      document.getElementById("resultat").textContent = "🎉 Bravo ! Score final : " + score;
+      document.getElementById("definition").textContent = messageScore(score);
+      document.getElementById("anagramme").textContent = "";
+      document.getElementById("temps").textContent = "";
+      clearInterval(timer);
+      return;
+    }
+  }
+  function lancerNiveau() {
+    changerNiveau();
+
+    document.getElementById("niveau").textContent = "Niveau : " + niveauActuel.toUpperCase();
+    document.getElementById("score").textContent = "Score : " + score;
+    document.getElementById("anagramme").textContent = "Devine ce mot : " + melanger(mots[indexMot]);
+    document.getElementById("reponse").value = "";
+    document.getElementById("resultat").textContent = "";
+    document.getElementById("definition").textContent = "";
+    tempsRestant = 30;
+    document.getElementById("temps").textContent = "Temps restant : " + tempsRestant + "s";
+
+    clearInterval(timer);
+    timer = setInterval(() => {
+      tempsRestant--;
+      document.getElementById("temps").textContent = "Temps restant : " + tempsRestant + "s";
+      if (tempsRestant <= 0) {
+        clearInterval(timer);
+        let motActuel = mots[indexMot];
+        document.getElementById("resultat").textContent = "⏱️ Temps écoulé ! Le mot était : " + motActuel;
+        document.getElementById("definition").textContent = "💡 " + (definitions[motActuel] || "Définition à découvrir par toi-même.");
+        indexMot++;
+        setTimeout(lancerNiveau, 3000);
+      }
+    }, 1000);
+  }
+
+  function verifier() {
+    let saisie = document.getElementById("reponse").value.trim().toLowerCase();
+    let motActuel = mots[indexMot];
+    if (saisie === motActuel) {
+      score += 10;
+      document.getElementById("resultat").textContent = "✅ Bravo ! +10 points";
+      document.getElementById("definition").textContent = "💡 " + (definitions[motActuel] || "Définition à découvrir par toi-même.");
+      clearInterval(timer);
+      indexMot++;
+      setTimeout(lancerNiveau, 3000);
+    } else {
+      document.getElementById("resultat").textContent = "❌ Mauvaise réponse. Réessaie !";
+    }
+  }
+
+  function rechargerMots() {
+    niveauActuel = "facile";
+    mots = [...niveaux[niveauActuel]];
+    indexMot = 0;
+    score = 0;
+    lancerNiveau();
+  }
+
+  lancerNiveau();
+</script>
+</body>
+</html>
