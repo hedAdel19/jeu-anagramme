@@ -1,1 +1,17 @@
 
+{
+  "name": "Jeu d'Anagramme Futuriste",
+  "short_name": "Anagramme",
+  "start_url": "/docs/index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00c2ff",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ],
+  "description": "Reconstitue les mots mélangés avant la fin du temps. Classement, score, animations et défis."
+}
