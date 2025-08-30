@@ -1,1 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jeu d'Anagramme Futuriste</title>
 
+  <!-- Favicon & Manifest -->
+  <link rel="icon" href="favicon.ico">
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Polices & Styles -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../src/styles/style.css">
+  <link rel="stylesheet" href="../src/styles/animations.css">
+</head>
+
+<body>
+  <canvas id="backgroundCanvas"></canvas> <!-- WebGL canvas -->
+
+  <header>
+    <h1>🔤 Jeu d'Anagramme</h1>
+    <p class="slogan">Décode les mots, défie le temps, deviens légendaire.</p>
+  </header>
+
+  <main>
+    <section id="game-interface">
+      <div id="status-bar">
+        <span id="niveau">Niveau : FACILE</span>
+        <span id="score">Score : 0</span>
+        <span id="temps">Temps : 30s</span>
+      </div>
+
+      <div id="anagramme-zone">
+        <p id="anagramme">Mot mélangé ici</p>
+        <input type="text" id="reponse" placeholder="Tape ta réponse ici">
+        <div class="buttons">
+          <button id="verifier">Vérifier</button>
+          <button id="recommencer">🔄 Recommencer</button>
+        </div>
+      </div>
+
+      <div id="feedback">
+        <p id="resultat"></p>
+        <p id="definition"></p>
+      </div>
+    </section>
+
+    <section id="scoreboard">
+      <h2>🏆 Classement</h2>
+      <ul id="listeScores"></ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 - Créé avec passion par Superman du Code 🦸‍♂️</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../src/data/mots.js"></script>
+  <script src="../src/data/definitions.js"></script>
+  <script src="../src/data/scores.js"></script>
+  <script src="../src/data/config.js"></script>
+  <script src="../src/components/Player.js"></script>
+  <script src="../src/components/GameEngine.js"></script>
+  <script src="../src/components/Scoreboard.js"></script>
+  <script src="../src/components/Timer.js"></script>
+  <script src="../src/components/UI.js"></script>
+  <script src="../src/components/Storage.js"></script>
+  <script src="../src/webgl/webgl.js"></script>
+  <script src="../src/main.js"></script>
+</body>
+</html>
