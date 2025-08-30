@@ -9,7 +9,7 @@ const scoreboard = new Scoreboard();
 // Chargement des données
 game.loadWords(mots); // depuis mots.js
 game.loadDefinitions(definitions); // depuis definitions.js
-scoreboard.loadScores(scores); // depuis scores.js
+scoreboard.loadScores(storage.load()); // chargement depuis localStorage
 
 // Initialisation de l’interface
 ui.updateScore(player.score);
@@ -37,6 +37,7 @@ document.getElementById("verifier").addEventListener("click", () => {
   }
 });
 
+// Bouton Recommencer
 document.getElementById("recommencer").addEventListener("click", () => {
   game.reset();
   player.resetScore();
@@ -45,6 +46,15 @@ document.getElementById("recommencer").addEventListener("click", () => {
   ui.updateScore(player.score);
   ui.updateLevel(game.level);
   ui.updateTimer(config.dureeInitiale);
+  timer.stop();
+  timer.start(config.dureeInitiale, (tempsRestant) => {
+    ui.updateTimer(tempsRestant);
+  }, () => {
+    ui.showError("⏱️ Temps écoulé !");
+    scoreboard.saveScore(player.name, player.score);
+    storage.save(scoreboard.scores);
+    scoreboard.display();
+  });
 });
 
 // Démarrage du minuteur
@@ -53,5 +63,6 @@ timer.start(config.dureeInitiale, (tempsRestant) => {
 }, () => {
   ui.showError("⏱️ Temps écoulé !");
   scoreboard.saveScore(player.name, player.score);
+  storage.save(scoreboard.scores);
   scoreboard.display();
 });
